@@ -1,6 +1,7 @@
 # 📡 Python News & Content Monitor
 
 A lightweight automation script that monitors news websites for updates. It identifies new content in real-time and maintains a local history to avoid data redundancy.
+Here it works with NYTimes and anaylise all the headlines to see what is the most common word used today
 
 ## 💡 How it Works
 1. **Scans** the target URL for specific headlines or article tags.
@@ -17,6 +18,7 @@ A lightweight automation script that monitors news websites for updates. It iden
 - [ ] Integration with Telegram Bot API for instant mobile alerts.
 - [ ] Multi-site monitoring support.
 - [ ] SQL Database integration for large-scale history tracking.
+- [ ] Web designing with any site 
 
 ---
 *Demonstrating proficiency in data persistence and automated monitoring.*
