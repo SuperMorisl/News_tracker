@@ -8,12 +8,10 @@ import os
 
 def check_news():
     url = "https://www.nytimes.com"
-
     headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept-Language": "en-US,en;q=0.9"
 }
-    
     try:
         response = requests.get(url, headers=headers, timeout=15)
         if response.status_code != 200:
@@ -21,42 +19,39 @@ def check_news():
             return
 
         soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Le NYT place ses titres dans des balises 'p', 'h3' ou 'span' avec des classes spécifiques
-        # On va chercher tous les textes à l'intérieur des liens d'articles
         found_titles = []
-        
-        # On cible les conteneurs de titres les plus fréquents au NYT
+        #we take all the headlines 
         containers = soup.find_all(['h3', 'h2', 'p'], class_=re.compile("indicate-hover|summary-class|headline"))
-        
+        #if not headlines we just take all the line in h2/h3
         if not containers:
-            # Plan B : On prend toutes les balises h3 et h2 sans distinction si le plan A échoue
             containers = soup.find_all(['h3', 'h2'])
 
         for item in containers:
             text = item.get_text(strip=True)
-            # Un titre fait généralement entre 20 et 150 caractères
             if 20 < len(text) < 150 and text not in found_titles:
                 found_titles.append(text)
         
         if not found_titles:
-            print("⚠️ Toujours rien. Le NYT bloque peut-être les requêtes directes.")
+            print("⚠️ No Headlines found.")
             return
 
-        # --- SAUVEGARDE ET ANALYSE ---
+        #Here saving and analysing data
         df = pd.DataFrame(found_titles, columns=["Title"])
         df.to_csv(f"nyt_titles_{datetime.datetime.now().strftime('%Y-%m-%d')}.csv", index=False)
         
+        #here we look after words most repeated of the day without any of the most common words in english language
         words = re.findall(r'\b[a-z]{4,}\b', " ".join(found_titles).lower())
         stop_words = {'with', 'from', 'that', 'this', 'their', 'they', 'have', 'about', 'says', 'after', 'will'}
-        filtered = [w for w in words if w not in stop_words]
+        filtered = []
+        for w in words:
+            if w not in stop_words:
+                filtered.append(w)
         
-        print(f"✅ {len(found_titles)} titres extraits !")
-        print(f"📊 Top mot : {Counter(filtered).most_common(1)[0][0].upper()}")
+        print(f"✅ {len(found_titles)} titles found !")
+        print(f"📊 Word of the day : {Counter(filtered).most_common(1)[0][0].upper()}")
 
     except Exception as e:
-        print(f"❌ Erreur : {e}")
+        print(f"❌ Error : {e}")
 
 if __name__ == "__main__":
-    print("--- Démarrage du Monitoring ---")
     check_news()
