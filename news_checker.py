@@ -4,7 +4,7 @@ import pandas as pd
 from collections import Counter
 import re
 import datetime
-import os 
+import matplotlib.pyplot as plt
 
 def check_news():
     url = "https://www.nytimes.com"
@@ -36,9 +36,9 @@ def check_news():
             return
 
         #Here saving and analysing data
+        today = datetime.datetime.now().strftime('%Y-%m-%d')
         df = pd.DataFrame(found_titles, columns=["Title"])
-        df.to_csv(f"nyt_titles_{datetime.datetime.now().strftime('%Y-%m-%d')}.csv", index=False)
-        
+        df.to_csv(f"nyt_titles_{today}.csv", index=False)
         #here we look after words most repeated of the day without any of the most common words in english language
         words = re.findall(r'\b[a-z]{4,}\b', " ".join(found_titles).lower())
         stop_words = {'with', 'from', 'that', 'this', 'their', 'they', 'have', 'about', 'says', 'after', 'will'}
@@ -46,6 +46,20 @@ def check_news():
         for w in words:
             if w not in stop_words:
                 filtered.append(w)
+        
+        data = Counter(filtered).most_common(10)
+        words_list = [x[0] for x in data]
+        counts_list = [x[1] for x in data]
+
+        plt.figure(figsize=(10, 6))
+        plt.bar(words_list, counts_list, color='skyblue')
+        plt.title(f"Top Trending Words on NYT - {datetime.datetime.now().strftime('%Y-%m-%d')}")
+        plt.xlabel("Words")
+        plt.ylabel("Frequency")
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        
+        plt.savefig(f"{today}.png")
         
         print(f"✅ {len(found_titles)} titles found !")
         print(f"📊 Word of the day : {Counter(filtered).most_common(1)[0][0].upper()}")
